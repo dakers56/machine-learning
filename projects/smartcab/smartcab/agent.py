@@ -100,7 +100,6 @@ class LearningAgent(Agent):
             return
         print("state: %s" % str(state))
         print("type of state: %s" % type(state))
-        print("Q: %s" % self.Q)
         print("type of self.Q: %s" % type(self.Q))
         if state not in self.Q:
             print("Creating state-action-dictionary")
@@ -114,7 +113,7 @@ class LearningAgent(Agent):
         # Set the agent state and default action
         self.state = state
         self.next_waypoint = self.planner.next_waypoint()
-        action = self.valid_actions[random.randrange(len(self.valid_actions))]
+        rand_action = self.valid_actions[random.randrange(len(self.valid_actions))]
 
         ########### 
         ## TO DO ##
@@ -125,10 +124,12 @@ class LearningAgent(Agent):
         # Be sure that when choosing an action with highest Q-value that you randomly select between actions that "tie".
         print("Q values of state: %s" % self.Q[state])
         print("Using maxQ = %s" % self.get_maxQ(state))
-        best_action = [a for a in self.valid_actions if self.Q[state][a] == self.get_maxQ(state)]
-        print("best actions: %s" % str(best_action))
-        print("Q value of best action: %s" % self.Q[state][best_action[0]])
-        return action if not self.learning else best_action[0]
+        best_actions = [a for a in self.valid_actions if self.Q[state][a] == self.get_maxQ(state)]
+        print("best actions: %s" % str(best_actions))
+        best_action = best_actions[0] if len(best_actions) == 0 else best_actions[random.randrange(len(best_actions))]
+        print ("Best action: %s" % best_action)
+        print("Q value of best action: %s" % self.Q[state][best_action])
+        return rand_action if not self.learning else best_action
 
     def learn(self, state, action, reward):
         """ The learn function is called after the agent completes an action and
