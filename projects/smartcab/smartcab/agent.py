@@ -39,7 +39,10 @@ class LearningAgent(Agent):
         # Update epsilon using a decay function of your choice
         # Update additional class parameters as needed
         # If 'testing' is True, set epsilon and alpha to 0
-
+        if testing:
+            self.epsilon = self.alpha = 0
+        else:
+            self.epsilon -= .05
         return None
 
     def build_state(self):
