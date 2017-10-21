@@ -72,19 +72,13 @@ class LearningAgent(Agent):
         ## TO DO ##
         ###########
 
-        # NOTE : you are not allowed to engineer eatures outside of the inputs available.
+        # NOTE : you are not allowed to engineer features outside of the inputs available.
         # Because the aim of this project is to teach Reinforcement Learning, we have placed 
         # constraints in order for you to learn how to adjust epsilon and alpha, and thus learn about the balance between exploration and exploitation.
         # With the hand-engineered features, this learning process gets entirely negated.
 
-        # Set 'state' as a tuple of relevant data for the agent        
-        state = [waypoint]
-        print("State after adding waypoint: %s" % waypoint)
-        for v in inputs.values():
-            print ("Appending %s to %s" % (v, state))
-            state.append(v)
-        print ("State after appending inputs: %s" % waypoint)
-        print("Returning state = %s" % state)
+        # Set 'state' as a tuple of relevant data for the agent
+        state = [waypoint, inputs['light'], inputs['left'], inputs['right'], inputs['oncoming']]
         return tuple(state)
 
     def get_maxQ(self, state):
@@ -125,7 +119,7 @@ class LearningAgent(Agent):
         # Set the agent state and default action
         self.state = state
         self.next_waypoint = self.planner.next_waypoint()
-        rand_action = self.valid_actions[random.randrange(len(self.valid_actions))]
+        rand_action = random.choice(self.valid_actions)
 
         ########### 
         ## TO DO ##
@@ -134,9 +128,11 @@ class LearningAgent(Agent):
         # When learning, choose a random action with 'epsilon' probability
         # Otherwise, choose an action with the highest Q-value for the current state
         # Be sure that when choosing an action with highest Q-value that you randomly select between actions that "tie".
+        return self.get_best_action(state) if self.epsilon < random.random() and self.learning else rand_action
+
+    def get_best_action(self, state):
         best_actions = [a for a in self.valid_actions if self.Q[state][a] == self.get_maxQ(state)]
-        best_action = best_actions[0] if len(best_actions) == 0 else best_actions[random.randrange(len(best_actions))]
-        return rand_action if not self.learning else best_action
+        return best_actions[0] if len(best_actions) == 0 else best_actions[random.randrange(len(best_actions))]
 
     def learn(self, state, action, reward):
         """ The learn function is called after the agent completes an action and
@@ -148,8 +144,9 @@ class LearningAgent(Agent):
         ###########
         # When learning, implement the value iteration update rule
         #   Use only the learning rate 'alpha' (do not use the discount factor 'gamma')
-        self.Q[state][action] *= (1 - self.alpha)
-        self.Q[state][action] += reward + self.get_maxQ(state)
+        if self.learning:
+            # We are not concerning ourselves with future rewards, so we only need worry about the current reward
+            self.Q[state][action] += self.alpha * reward
         return
 
     def update(self):
